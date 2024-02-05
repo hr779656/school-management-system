@@ -1,16 +1,28 @@
-const {body, validationResult} = require('express-validator')
+const {validationResult} = require('express-validator')
+const prisma = require('../DB/dbConfig')
 
 
-let ValidSch_userReg = [
-    body('name').isLength({ min: 6, max: 12 }).withMessage('Username must be 6 and 12 char'),
-    body('password').isLength({ min: 8, max: 8 }).withMessage('Password must be 8 char required')
-];
+const createuser = async (req, res)=>{
+    const errors = validationResult(req)
+  
+    if(!errors.isEmpty()){
+        return res.status(422).json(errors.array())
+    }
 
+    let {name, password, role} = req.body
 
-const createuser = (req, res)=>{
- console.log(req.body)
- res.json(req.body)
+    name = name.trim().toLowerCase()
+    password = password.trim().toLowerCase()
+
+    await prisma.users.create({
+        name,
+        password,
+        role
+    }).then((result)=>{
+        res.json({ msg: "user successfully Register" })
+    }).catch((err)=>{
+        res.json({msg: err})
+    })
 }
-
 
 module.exports = {createuser}
