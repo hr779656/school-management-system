@@ -4,19 +4,23 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:j4asbc56@localhost:5432/SMSDb?schema=public"
 }
 
 model Users {
   id        Int      @id @default(autoincrement())
   name      String
   password  String
-  role      Role     @default(user)
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
 
 enum Role {
-  user
-  admin
-}
+  USER
+  ADMIN
+} 
+
+
+
+
