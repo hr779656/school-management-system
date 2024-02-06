@@ -9,6 +9,6 @@ app.use(express.json())
 app.use(routes)
 
 app.listen(port, ()=>{
-    console.log(`server Run on This Port: ${port}`)
+    console.log(`server running on localhost:${port}`)
 })
 
