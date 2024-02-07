@@ -1,14 +1,17 @@
-const express = require('express')
-const app = express()
-require('dotenv').config()
-const port = process.env.port || 4000
-const routes = require('./routes/allroutes')
+const express = require('express');
+require('dotenv').config();
 
-app.use(express.urlencoded({extended: false}))
-app.use(express.json())
-app.use(routes)
+const app = express();
+const port = process.env.port || 4000;
+const apiRoutes = require('./routes');
+const DB = require('./DB');
 
-app.listen(port, ()=>{
-    console.log(`server running on localhost:${port}`)
-})
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
+app.use(apiRoutes);
+
+app.listen(port, () => {
+  DB.startDB();
+  console.log(`server running on localhost:${port}`);
+});
