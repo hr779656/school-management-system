@@ -5,8 +5,8 @@ const { protectRoutes } = require("../../middlewares/index");
 
 const userRoute = express.Router();
 
-// userRoute.get('/get-users', protectedRoute, userControllers.getUsers);
-// userRoute.delete('/:userId', protectedRoute, userControllers.deleteUser);
+userRoute.get("/get-users", userControllers.getUsers);
+userRoute.delete("/:userId", userControllers.deleteUser);
 userRoute.post("/add-user", protectRoutes, userControllers.addUserController);
 userRoute.post("/login-user", userControllers.loginUserController);
 

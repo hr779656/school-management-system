@@ -57,4 +57,26 @@ const loginUserController = asyncHandler(async (req, res, next) => {
   sendCookieToken(user, 200, req, res);
 });
 
-module.exports = { addUserController, loginUserController };
+const getUsers = asyncHandler(async (req, res, next) => {
+  const users = await prisma.users.findMany();
+  if (!users) {
+    next(new ErrorHandler("No users found ", 400));
+  }
+  return res.status(200).json({ data: users });
+});
+
+const deleteUser = asyncHandler(async (req, res, next) => {
+  const { userId } = req.params;
+  const user = await prisma.users.delete({ where: { id: Number(userId) } });
+  if (!user) {
+    next(new ErrorHandler("No user found ", 400));
+  }
+  return res.status(200).json({ message: "User deleted successfully " });
+});
+
+module.exports = {
+  addUserController,
+  loginUserController,
+  getUsers,
+  deleteUser,
+};
