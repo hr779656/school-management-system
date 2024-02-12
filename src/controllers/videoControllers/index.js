@@ -1,3 +1,3 @@
-const { addVideoController } = require("./videoControllers");
+const { viewVideoController } = require('./videoControllers');
 
-module.exports = { addVideoController };
+module.exports = { viewVideoController };
