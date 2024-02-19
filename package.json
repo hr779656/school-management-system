@@ -20,6 +20,9 @@
     "multer": "^1.4.5-lts.1",
     "prisma": "^5.9.1"
   },
+  "prisma": {
+    "schema": "./src/prisma/schema.prisma"
+  },
   "description": "",
   "devDependencies": {
     "eslint": "^8.56.0",
