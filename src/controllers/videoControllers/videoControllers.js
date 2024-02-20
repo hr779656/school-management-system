@@ -72,6 +72,7 @@ const uploadVideoController = asyncHandler(
 );
 
 //  view video Controllerv =========
+// eslint-disable-next-line consistent-return
 const viewVideoController = asyncHandler(async (req, res, next) => {
   try {
     const { videoId } = req.params;
@@ -88,28 +89,21 @@ const viewVideoController = asyncHandler(async (req, res, next) => {
     data.on('error', () => next(new ErrorHandler('err occured during video palyback', 400)));
     data.on('end', () => res.end());
   } catch (err) {
-    next(new ErrorHandler('Error occured during video playback', 400));
+    return next(new ErrorHandler('Error occured during video playback', 400));
   }
 });
 
 //  Delete video Controllerv =========
 const deleteVideoController = asyncHandler(async (req, res, next) => {
-  const videoId = '1m8dkonZoFWMyCqB05PHFvMYWfnY9mbIG';
+  const videoId = '114YEPHDq0IB-EZSYXrhiATRLOp_Oqpgy';
 
-  await drive.files
-    .get({
-      fileId: videoId,
-    })
-    .then(async () => {
-      await drive.files.delete({
-        fileId: videoId,
-      });
-
-      res.status(200).json({ msg: 'Delete Successfully' });
-    })
-    .catch(() => {
-      next(new ErrorHandler('File Not Found', 400));
-    });
+  const deletedVideo = await drive.files.delete({
+    fileId: videoId,
+  });
+  if (!deletedVideo) {
+    return next(new ErrorHandler('Unable to delete video', 500));
+  }
+  return res.status(200).json({ message: 'video has been deleted successfully' });
 });
 
 module.exports = {
