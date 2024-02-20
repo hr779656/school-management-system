@@ -1,12 +1,12 @@
-const { body } = require("express-validator");
+const { body } = require('express-validator');
 
 const validSchUserReg = [
-  body("name")
+  body('name')
     .isLength({ min: 3, max: 10 })
-    .withMessage("Username must be 3 and 10 char"),
-  body("password")
+    .withMessage('Username must be 3 and 10 char'),
+  body('password')
     .isLength({ min: 6, max: 6 })
-    .withMessage("Password must be 6 char required"),
+    .withMessage('Password must be 6 char required'),
 ];
 
 module.exports = validSchUserReg;

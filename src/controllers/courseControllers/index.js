@@ -1,14 +1,14 @@
 const {
   getCourses,
-  getSingleCourse,
+  getCourse,
   addCourse,
   updateCourse,
   deleteCourse,
-} = require("./courseControllers");
+} = require('./courseControllers');
 
 module.exports = {
   getCourses,
-  getSingleCourse,
+  getCourse,
   addCourse,
   updateCourse,
   deleteCourse,

@@ -6,28 +6,31 @@ const { ErrorHandler } = require('../../utils/errorhandler');
 const getCourses = asyncHandler(async (req, res, next) => {
   const courses = await prisma.courses.findMany();
   if (!courses) {
-    next(new ErrorHandler('No courses found ', 400));
+    return next(new ErrorHandler('No courses found ', 404));
   }
   return res.status(200).json({ data: courses });
 });
 
 // getSingleCourse Controller
-const getSingleCourse = asyncHandler(async (req, res, next) => {
+const getCourse = asyncHandler(async (req, res, next) => {
   const { courseId } = req.params;
   const course = await prisma.courses.findFirst({
     where: { id: Number(courseId) },
   });
-  if (!course) {
-    next(new ErrorHandler('No course found ', 400));
+
+  if (course == null) {
+    return next(new ErrorHandler('No course found ', 404));
   }
   return res.status(200).json({ data: course });
 });
 
 // addCourse Controller
 const addCourse = asyncHandler(async (req, res, next) => {
-  const { title, description } = req.body;
+  const {
+    title, description, price, image,
+  } = req.body;
 
-  if (!title || !description) {
+  if (!title || !description || !price || !image) {
     return next(new ErrorHandler('Please fill all required fields', 400));
   }
 
@@ -40,6 +43,8 @@ const addCourse = asyncHandler(async (req, res, next) => {
     data: {
       title,
       description,
+      price,
+      image,
     },
   });
 
@@ -53,11 +58,13 @@ const addCourse = asyncHandler(async (req, res, next) => {
 // updateCourse Controller
 const updateCourse = asyncHandler(async (req, res, next) => {
   const { courseId } = req.params;
-  const { title, discription } = req.body;
+  const {
+    title, description, price, image,
+  } = req.body;
 
-  if (!title && !discription) {
-    return next(new ErrorHandler('Please fill all required fields', 400));
-  }
+  // if (!title && !description) {
+  //   return next(new ErrorHandler('Please fill all required fields', 400));
+  // }
 
   const courseExist = await prisma.courses.findFirst({
     where: { id: Number(courseId) },
@@ -72,14 +79,16 @@ const updateCourse = asyncHandler(async (req, res, next) => {
     },
     data: {
       title,
-      discription,
+      description,
+      price,
+      image,
     },
   });
 
   if (!updateCourseDB) {
     return next(new ErrorHandler('Course could not be updated', 500));
   }
-  console.log(updateCourseDB);
+
   return res.status(200).json({ message: 'Course updated successfully' });
 });
 
@@ -90,14 +99,14 @@ const deleteCourse = asyncHandler(async (req, res, next) => {
     where: { id: Number(courseId) },
   });
   if (!course) {
-    next(new ErrorHandler('No course found ', 400));
+    return next(new ErrorHandler('No course found ', 404));
   }
   return res.status(200).json({ message: 'Course deleted successfully ' });
 });
 
 module.exports = {
   getCourses,
-  getSingleCourse,
+  getCourse,
   addCourse,
   updateCourse,
   deleteCourse,
