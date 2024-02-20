@@ -13,6 +13,10 @@ app.use(cors());
 app.use(apiRoutes);
 app.use(globalErrorHandler);
 
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Working fine' });
+});
+
 const server = app.listen(port, () => {
   DB.startDB();
   console.log(`server running on localhost:${port}`);

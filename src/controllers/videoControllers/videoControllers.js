@@ -45,7 +45,7 @@ const uploadFile = async (fileObject) => {
 const uploadVideoController = asyncHandler(
   upload.any(),
   // eslint-disable-next-line no-unused-vars
-  async (req, res, _next) => {
+  async (req, res, next) => {
     try {
       const { body, files } = req;
 
@@ -56,7 +56,8 @@ const uploadVideoController = asyncHandler(
       console.log(body);
       res.status(200).send('form Submitted');
       if (body && files) {
-        for (let f = 0; f < files.length; f++) {
+        for (let f = 0; f < files.length; f + 1) {
+          // eslint-disable-next-line no-await-in-loop
           await uploadFile(files[f]);
         }
         console.log(body);
@@ -99,14 +100,14 @@ const deleteVideoController = asyncHandler(async (req, res, next) => {
     .get({
       fileId: videoId,
     })
-    .then(async (result) => {
+    .then(async () => {
       await drive.files.delete({
         fileId: videoId,
       });
 
       res.status(200).json({ msg: 'Delete Successfully' });
     })
-    .catch((err) => {
+    .catch(() => {
       next(new ErrorHandler('File Not Found', 400));
     });
 });
