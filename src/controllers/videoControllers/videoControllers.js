@@ -1,16 +1,17 @@
-const stream = require("stream");
-const path = require("path");
-const { google } = require("googleapis");
-const multer = require("multer");
+const stream = require('stream');
+const path = require('path');
+const { google } = require('googleapis');
+const multer = require('multer');
+
 const upload = multer();
-const process = require("process");
-const asyncHandler = require("../../utils/asyncHandler");
-const { ErrorHandler } = require("../../utils/errorhandler");
+const process = require('process');
+const asyncHandler = require('../../utils/asyncHandler');
+const { ErrorHandler } = require('../../utils/errorhandler');
 
 // streaming Setup =========
 const dir = process.cwd();
-const KEYFILEPATH = path.join(dir, "/src/credentials.json");
-const SCOPES = ["https://www.googleapis.com/auth/drive"];
+const KEYFILEPATH = path.join(dir, '/src/credentials.json');
+const SCOPES = ['https://www.googleapis.com/auth/drive'];
 
 const auth = new google.auth.GoogleAuth({
   keyFile: KEYFILEPATH,
@@ -18,7 +19,7 @@ const auth = new google.auth.GoogleAuth({
 });
 
 const drive = google.drive({
-  version: "v3",
+  version: 'v3',
   auth,
 });
 
@@ -33,9 +34,9 @@ const uploadFile = async (fileObject) => {
     },
     requestBody: {
       name: fileObject.originalname,
-      parents: ["1BVrmiApLtc6gjtNDPXE1Q3TqCmQ1hSeh"],
+      parents: ['1BVrmiApLtc6gjtNDPXE1Q3TqCmQ1hSeh'],
     },
-    fields: "id, name",
+    fields: 'id, name',
   });
   console.log(`Uploaded file ${data.name} ${data.id}`);
 };
@@ -43,19 +44,21 @@ const uploadFile = async (fileObject) => {
 // Upload Video Controller
 const uploadVideoController = asyncHandler(
   upload.any(),
-  async (req, res, next) => {
+  // eslint-disable-next-line no-unused-vars
+  async (req, res, _next) => {
     try {
       const { body, files } = req;
 
-      for (let f = 0; f < files.length; f++) {
+      for (let f = 0; f < files.length; f += 1) {
+        // eslint-disable-next-line no-await-in-loop
         await uploadFile(files[f]);
       }
       console.log(body);
-      res.status(200).send("form Submitted");
+      res.status(200).send('form Submitted');
     } catch (err) {
       res.send(err.message);
     }
-  }
+  },
 );
 
 //  view video Controllerv =========
@@ -66,18 +69,16 @@ const viewVideoController = asyncHandler(async (req, res, next) => {
     const { data } = await drive.files.get(
       {
         fileId: videoId,
-        alt: "media",
+        alt: 'media',
       },
-      { responseType: "stream" }
+      { responseType: 'stream' },
     );
 
     data.pipe(res);
-    data.on("error", () =>
-      next(new ErrorHandler("err occured during video palyback", 400))
-    );
-    data.on("end", () => res.end());
+    data.on('error', () => next(new ErrorHandler('err occured during video palyback', 400)));
+    data.on('end', () => res.end());
   } catch (err) {
-    next(new ErrorHandler("Error occured during video playback", 400));
+    next(new ErrorHandler('Error occured during video playback', 400));
   }
 });
 
