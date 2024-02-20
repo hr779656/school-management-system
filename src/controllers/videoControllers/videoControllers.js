@@ -55,8 +55,17 @@ const uploadVideoController = asyncHandler(
       }
       console.log(body);
       res.status(200).send('form Submitted');
+      if (body && files) {
+        for (let f = 0; f < files.length; f++) {
+          await uploadFile(files[f]);
+        }
+        console.log(body);
+        res.status(200).json({ msg: 'Video Successfully Uploaded' });
+      } else {
+        next(new ErrorHandler('All Data Required', 402));
+      }
     } catch (err) {
-      res.send(err.message);
+      next(new ErrorHandler('Upload Video Opration Failed', 400));
     }
   },
 );
@@ -82,4 +91,28 @@ const viewVideoController = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = { viewVideoController, uploadVideoController };
+//  Delete video Controllerv =========
+const deleteVideoController = asyncHandler(async (req, res, next) => {
+  const videoId = '1m8dkonZoFWMyCqB05PHFvMYWfnY9mbIG';
+
+  await drive.files
+    .get({
+      fileId: videoId,
+    })
+    .then(async (result) => {
+      await drive.files.delete({
+        fileId: videoId,
+      });
+
+      res.status(200).json({ msg: 'Delete Successfully' });
+    })
+    .catch((err) => {
+      next(new ErrorHandler('File Not Found', 400));
+    });
+});
+
+module.exports = {
+  viewVideoController,
+  uploadVideoController,
+  deleteVideoController,
+};

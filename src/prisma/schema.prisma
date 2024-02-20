@@ -22,3 +22,11 @@ enum Role {
   USER
   ADMIN
 }
+
+model Courses {
+  id          Int      @id @default(autoincrement())
+  title       String
+  discription String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+}

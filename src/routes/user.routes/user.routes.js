@@ -1,7 +1,6 @@
 const express = require("express");
 const { userControllers } = require("../../controllers");
 const { protectRoutes } = require("../../middlewares/index");
-// const { protectedRoute } = require('../../middlewares/protectedRoute');
 
 const userRoute = express.Router();
 
