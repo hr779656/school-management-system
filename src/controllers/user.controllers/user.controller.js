@@ -6,10 +6,10 @@ const { sendCookieToken } = require('../authControllers');
 
 const addUserController = asyncHandler(async (req, res, next) => {
   const {
-    name, password, email, age, role,
+    name, password, email, age, role, city, status, enrolledCourses,
   } = req.body;
 
-  if (!name && !password && !email && !age && !role) {
+  if (!name || !password || !email || !age || !role || !city || typeof status !== 'boolean') {
     return next(new ErrorHandler('Please fill all required fields', 400));
   }
 
@@ -32,13 +32,18 @@ const addUserController = asyncHandler(async (req, res, next) => {
       email,
       age,
       role,
+      city,
+      status,
+      enrolledCourses: {
+        connect: enrolledCourses.map((obj) => ({ id: parseInt(obj.id, 10) })),
+      },
     },
   });
 
   if (!addUserDB) {
     return next(new ErrorHandler('User could not be added', 500));
   }
-  console.log(addUserDB);
+
   return res.status(200).json({ message: 'User added successfully' });
 });
 
@@ -60,7 +65,9 @@ const loginUserController = asyncHandler(async (req, res, next) => {
 });
 
 const getUsers = asyncHandler(async (req, res, next) => {
-  const users = await prisma.users.findMany();
+  const users = await prisma.users.findMany({
+    include: { enrolledCourses: true },
+  });
   if (!users) {
     next(new ErrorHandler('No users found ', 400));
   }

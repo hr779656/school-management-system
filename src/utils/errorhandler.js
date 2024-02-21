@@ -51,7 +51,7 @@ const sendErrorDev = (err, req, res) => {
       name: err.name,
       error: err,
       message: err.message,
-      stack: err.stack,
+
     });
   }
   console.error('ERROR 💥', err);
