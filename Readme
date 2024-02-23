@@ -1,0 +1,12 @@
+/video/upload-video
+Admin can upload video by sending
+title, description, courseId, and video
+to this endpoint
+
+
+/video/:videoId
+Users can view video  by clicking on video,
+FE will send videoSecretID by params,
+server will check that this video exist in the course where user enrolled in.
+if user is enrolled in the same course, where video exist,
+then that video will be served by google drive

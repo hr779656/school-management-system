@@ -8,17 +8,17 @@ datasource db {
 }
 
 model Users {
-  id              Int       @id @default(autoincrement())
-  name            String
-  password        String
-  email           String    @unique
-  age             Int
-  city            String
-  status          Boolean?  @default(false)
-  role            Role      @default(USER)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @default(now())
-  enrolledCourses Courses[] @relation("Enrollment")
+  id        Int       @id @default(autoincrement())
+  name      String
+  password  String
+  email     String    @unique
+  age       Int
+  city      String
+  status    Boolean?  @default(false)
+  role      Role      @default(USER)
+  courses   Courses[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
 }
 
 enum Role {
@@ -27,16 +27,16 @@ enum Role {
 }
 
 model Courses {
-  id               Int      @id @default(autoincrement())
-  title            String
-  description      String
-  price            Int      @default(10)
-  image            String   @default("will added later")
-  totalVideos      Int?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @default(now())
-  enrolledStudents Users[]  @relation("Enrollment")
-  videos           Videos[] @relation("VideoCourseRelation")
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  price       Int    @default(10)
+  image       String @default("will added later")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  users     Users[]
+  videos    Videos[]
 }
 
 model Videos {
@@ -45,7 +45,7 @@ model Videos {
   description String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
-  course      Courses[] @relation("VideoCourseRelation")
+  course      Courses[]
 }
 
 // course table

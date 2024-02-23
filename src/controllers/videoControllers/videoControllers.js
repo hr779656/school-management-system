@@ -41,6 +41,7 @@ const uploadFile = async (fileObject) => {
     fields: 'id, name',
   });
   console.log(`Uploaded file ${data.name} ${data.id}`);
+  return data.id;
 };
 
 // const getVideosController = asyncHandler(async (req, res, next) => {
@@ -55,19 +56,42 @@ const uploadFile = async (fileObject) => {
 
 // Upload Video Controller
 const uploadVideoController = asyncHandler(async (req, res, next) => {
-  // const { body, files } = req;
-  const { title, description, course } = req.body;
+  const { file } = req;
+  const {
+    title, description, courseId,
+  } = req.body;
+  const {
+    headers,
+  } = req;
 
-  if (!title || !description || !course) {
+  console.log(req.file);
+  console.log(req.body);
+  console.log(headers);
+
+  if (!title || !description || !courseId) {
     return next(new ErrorHandler('Please fill all required fields!', 400));
   }
+  const courseExist = await prisma.courses.findFirst({ where: { id: Number(courseId) } });
+  if (!courseExist) {
+    return next(new ErrorHandler('Course dosent exisr', 400));
+  }
 
+  //  upload video and extract video secret id
+  // then save this videosecId to database
+  const uploadToGoogle = await uploadFile(file);
+  console.log(uploadToGoogle);
+  if (!uploadToGoogle) {
+    return next(new ErrorHandler('Unable to upload video', 400));
+  }
+
+  // now extract video id and save it to db as videoSecretId
   const uploadedVideo = await prisma.videos.create({
     data: {
       title,
       description,
+      videoAuthId,
       course: {
-        connect: { id: parseInt(course.id, 10) },
+        connect: { id: parseInt(courseId, 10) },
       },
     },
   });
@@ -99,7 +123,7 @@ const uploadVideoController = asyncHandler(async (req, res, next) => {
 const viewVideoController = asyncHandler(async (req, res, next) => {
   const { videoId } = req.params;
   if (!videoId) {
-    return next(new ErrorHandler('Please add valid video id', 400));
+    return next(new ErrorHandler('Invalid video id', 400));
   }
   const video = await prisma.videos.findFirst({ where: { id: Number(videoId) } });
 
@@ -141,6 +165,7 @@ const deleteVideoController = asyncHandler(async (req, res, next) => {
 });
 
 module.exports = {
+  // getVideosController,
 
   viewVideoController,
   uploadVideoController,

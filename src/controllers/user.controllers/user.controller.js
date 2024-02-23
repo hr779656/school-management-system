@@ -6,7 +6,7 @@ const { sendCookieToken } = require('../authControllers');
 
 const addUserController = asyncHandler(async (req, res, next) => {
   const {
-    name, password, email, age, role, city, status, enrolledCourses,
+    name, password, email, age, role, city, status,
   } = req.body;
 
   if (!name || !password || !email || !age || !role || !city || typeof status !== 'boolean') {
@@ -34,9 +34,7 @@ const addUserController = asyncHandler(async (req, res, next) => {
       role,
       city,
       status,
-      enrolledCourses: {
-        connect: enrolledCourses.map((obj) => ({ id: parseInt(obj.id, 10) })),
-      },
+
     },
   });
 
@@ -64,9 +62,40 @@ const loginUserController = asyncHandler(async (req, res, next) => {
   sendCookieToken(user, 200, req, res);
 });
 
+const updateUserController = asyncHandler(async (req, res, next) => {
+  const {
+    userId,
+  } = req.params;
+  const {
+    body,
+  } = req;
+
+  const userExist = await prisma.users.findFirst({ where: { id: Number(userId) } });
+
+  if (!userExist) {
+    return next(new ErrorHandler('User dosent  exists', 404));
+  }
+
+  // Save user in the database
+  const addUserDB = await prisma.users.update({
+    where: { id: Number(userId) },
+    data: {
+      ...body,
+      courses: { connect: body.courses.map((courseId) => ({ id: courseId })) },
+
+    },
+  });
+
+  if (!addUserDB) {
+    return next(new ErrorHandler('Unable to update user', 500));
+  }
+
+  return res.status(200).json({ message: 'User updated successfully' });
+});
+
 const getUsers = asyncHandler(async (req, res, next) => {
   const users = await prisma.users.findMany({
-    include: { enrolledCourses: true },
+    include: { courses: { select: { title: true } } },
   });
   if (!users) {
     next(new ErrorHandler('No users found ', 400));
@@ -84,6 +113,7 @@ const deleteUser = asyncHandler(async (req, res, next) => {
 });
 
 module.exports = {
+  updateUserController,
   addUserController,
   loginUserController,
   getUsers,

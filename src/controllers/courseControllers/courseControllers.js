@@ -5,20 +5,32 @@ const { ErrorHandler } = require('../../utils/errorhandler');
 // getCourses Controller
 const getCourses = asyncHandler(async (req, res, next) => {
   const courses = await prisma.courses.findMany({
-    include: { enrolledStudents: { select: { id: true } }, videos: true },
+    include: {
+      _count: {
+        select: {
+          videos: true,
+          users: true,
+        },
+      },
+      users: { select: { name: true } },
+      videos: {
+        select: { title: true },
+
+      },
+    },
   });
-  if (!courses) {
+  if (!courses || courses.length === 0) {
     return next(new ErrorHandler('No courses found ', 404));
   }
-  const coursesWithCount = courses.map((course) => (
-    {
-      ...course,
-      totalEnrolled: course.enrolledStudents.length,
-      totalVideos: course.videos.length,
-    }
-  ));
+  // const coursesWithCount = courses.map((course) => (
+  //   {
+  //     ...course,
+  //     totalEnrolled: course.enrolledStudents.length,
+  //     totalVideos: course.videos.length,
+  //   }
+  // ));
 
-  return res.status(200).json({ data: coursesWithCount });
+  return res.status(200).json({ data: courses });
 });
 
 // getSingleCourse Controller

@@ -1,12 +1,13 @@
 const JWT = require('jsonwebtoken');
-const { prisma } = require('../DB/dbConfig');
-const { environmentVariables } = require('../config');
 const asyncHandler = require('../utils/asyncHandler');
 const { ErrorHandler } = require('../utils/errorhandler');
+const { environmentVariables } = require('../config');
+const { prisma } = require('../DB/dbConfig');
 
 // eslint-disable-next-line consistent-return
-const protectRoutes = asyncHandler(async (req, res, next) => {
+const protectVideo = asyncHandler(async (req, res, next) => {
   const token = req.headers.cookie;
+  const { videoId } = req.params;
 
   if (!token) {
     return next(new ErrorHandler('Unauthorized - No token provided', 401));
@@ -16,18 +17,19 @@ const protectRoutes = asyncHandler(async (req, res, next) => {
   if (!decoded) {
     return next(new ErrorHandler('Unauthorized - Invalid token', 401));
   }
-  const admin = await prisma.users.findUnique({
+
+  const enrolledCourses = await prisma.users.findFirst({
+    where: { id: decoded.id },
+    include: { courses: { select: { videos: {where: {videoAuthId: videoId}}} } } },
+  });
+
+  const user = await prisma.users.findFirst({
     where: {
       id: decoded.id,
-      role: 'ADMIN',
+
     },
   });
 
-  if (!admin) {
-    return next(new ErrorHandler('Unauthorized Acess!', 401));
-  }
-
   next();
 });
-
-module.exports = { protectRoutes };
+module.exports = { protectVideo };
