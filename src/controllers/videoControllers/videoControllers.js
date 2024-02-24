@@ -26,47 +26,36 @@ const drive = google.drive({
 
 // Video Upload Logic============
 // eslint-disable-next-line no-unused-vars
-const uploadFile = async (fileObject) => {
+const uploadFile = async (video) => {
+  if (!video.buffer) {
+    console.error('Error: Invalid file object');
+    return null;
+  }
+
   const bufferStream = new stream.PassThrough();
-  bufferStream.end(fileObject.buffer);
+  bufferStream.end(video.buffer);
   const { data } = await drive.files.create({
     media: {
-      mimeType: fileObject.mimetype,
+      mimeType: video.mimetype,
       body: bufferStream,
     },
     requestBody: {
-      name: fileObject.originalname,
+      name: video.originalname,
       parents: ['1BVrmiApLtc6gjtNDPXE1Q3TqCmQ1hSeh'],
     },
     fields: 'id, name',
   });
-  console.log(`Uploaded file ${data.name} ${data.id}`);
+
   return data.id;
 };
 
-// const getVideosController = asyncHandler(async (req, res, next) => {
-//   const courseId = req.params;
-
-//   const videos = await prisma.videos.findMany({ });
-//   if (!videos) {
-//     return next(new ErrorHandler('Unable to get videos', 404));
-//   }
-//   return res.status(200).json({ data: videos });
-// });
-
 // Upload Video Controller
 const uploadVideoController = asyncHandler(async (req, res, next) => {
-  const { file } = req;
+  const { files } = req;
+  const video = files[0];
   const {
     title, description, courseId,
   } = req.body;
-  const {
-    headers,
-  } = req;
-
-  console.log(req.file);
-  console.log(req.body);
-  console.log(headers);
 
   if (!title || !description || !courseId) {
     return next(new ErrorHandler('Please fill all required fields!', 400));
@@ -76,20 +65,17 @@ const uploadVideoController = asyncHandler(async (req, res, next) => {
     return next(new ErrorHandler('Course dosent exisr', 400));
   }
 
-  //  upload video and extract video secret id
-  // then save this videosecId to database
-  const uploadToGoogle = await uploadFile(file);
-  console.log(uploadToGoogle);
+  const uploadToGoogle = await uploadFile(video);
+
   if (!uploadToGoogle) {
     return next(new ErrorHandler('Unable to upload video', 400));
   }
 
-  // now extract video id and save it to db as videoSecretId
   const uploadedVideo = await prisma.videos.create({
     data: {
       title,
       description,
-      videoAuthId,
+      videoAuthId: uploadToGoogle,
       course: {
         connect: { id: parseInt(courseId, 10) },
       },
@@ -98,27 +84,9 @@ const uploadVideoController = asyncHandler(async (req, res, next) => {
   if (!uploadedVideo) {
     return next(new ErrorHandler('Unable to add video Data', 500));
   }
-  return res.status(200).json({ data: uploadedVideo });
-
-  // for (let f = 0; f < files.length; f += 1) {
-  //   // eslint-disable-next-line no-await-in-loop
-  //   await uploadFile(files[f]);
-  // }
-  // console.log(body);
-  // res.status(200).send('form Submitted');
-  // if (body && files) {
-  //   for (let f = 0; f < files.length; f + 1) {
-  //     // eslint-disable-next-line no-await-in-loop
-  //     await uploadFile(files[f]);
-  //   }
-  //   console.log(body);
-  //   res.status(200).json({ msg: 'Video Successfully Uploaded' });
-  // } else {
-  //   next(new ErrorHandler('All Data Required', 402));
-  // }
+  return res.status(200).json({ message: 'Video uploaded Successfully' });
 });
 
-//  view video Controllerv =========
 // eslint-disable-next-line consistent-return
 const viewVideoController = asyncHandler(async (req, res, next) => {
   const { videoId } = req.params;
@@ -131,27 +99,8 @@ const viewVideoController = asyncHandler(async (req, res, next) => {
     return next(new ErrorHandler('Video Not Found', 404));
   }
   return res.status(200).json({ data: video });
-
-  // try {
-  //   const { videoId } = req.params;
-
-  //   const { data } = await drive.files.get(
-  //     {
-  //       fileId: videoId,
-  //       alt: 'media',
-  //     },
-  //     { responseType: 'stream' },
-  //   );
-
-  //   data.pipe(res);
-  //   data.on('error', () => next(new ErrorHandler('err occured during video palyback', 400)));
-  //   data.on('end', () => res.end());
-  // } catch (err) {
-  //   return next(new ErrorHandler('Error occured during video playback', 400));
-  // }
 });
 
-//  Delete video Controllerv =========
 const deleteVideoController = asyncHandler(async (req, res, next) => {
   const videoId = '114YEPHDq0IB-EZSYXrhiATRLOp_Oqpgy';
 
@@ -165,7 +114,6 @@ const deleteVideoController = asyncHandler(async (req, res, next) => {
 });
 
 module.exports = {
-  // getVideosController,
 
   viewVideoController,
   uploadVideoController,

@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = "postgresql://postgres:j4asbc56@localhost:5432/SMSDb?schema=public"
+  provider          = "postgresql"
+  url               = "postgres://rdomfzja:W9O0nfQyaRjgbFpd5v-y5IL7BI7jdvhZ@bubble.db.elephantsql.com:5432/rdomfzja"
+  shadowDatabaseUrl = "postgresql://postgres:j4asbc56@localhost:5432/SMSDb?schema=public"
 }
 
 model Users {
@@ -43,10 +44,8 @@ model Videos {
   id          Int       @id @default(autoincrement())
   title       String
   description String
+  videoAuthId String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
   course      Courses[]
 }
-
-// course table
-// id title desc price image "quantity"

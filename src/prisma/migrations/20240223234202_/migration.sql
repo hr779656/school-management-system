@@ -24,7 +24,6 @@ CREATE TABLE "Courses" (
     "description" TEXT NOT NULL,
     "price" INTEGER NOT NULL DEFAULT 10,
     "image" TEXT NOT NULL DEFAULT 'will added later',
-    "totalVideos" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -36,6 +35,7 @@ CREATE TABLE "Videos" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "videoAuthId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
