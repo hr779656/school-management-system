@@ -38,7 +38,7 @@ const getCourse = asyncHandler(async (req, res, next) => {
   const { courseId } = req.params;
   const course = await prisma.courses.findFirst({
     where: { id: Number(courseId) },
-    include: { videos: true },
+    include: { videos: true,  enrolledStudents: true},
   });
 
   if (!course) {
