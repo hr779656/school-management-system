@@ -112,10 +112,62 @@ const deleteUser = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ message: 'User deleted successfully ' });
 });
 
+
+const userCourseProgres = asyncHandler(async (req, res, next) => {
+  const { userId, courseId, videosWatched, completed } = req.body
+
+  if (!userId || !courseId || !videosWatched || !completed) {
+    return next(new ErrorHandler("All fileds Are Required", 400))
+  }
+
+  const C_Ufind = await prisma.userCourseProgress.findFirst({
+    where: {
+      userId: Number(userId),
+      courseId: Number(courseId)
+    }
+  })
+
+  if (!C_Ufind) {
+
+    await prisma.userCourseProgress.create({
+      data: {
+        userId: Number(userId),
+        courseId: Number(courseId),
+        videosWatched: Number(videosWatched),
+        completed
+      }
+    }).then((result) => {
+      console.log(result)
+      res.status(200).json({ msg: 'userProgress saved successfully' })
+    })
+      .catch((err) => {
+        console.log(err)
+        next(new ErrorHandler('something wrong userProgress Not saved', 400))
+      })
+  }
+
+
+  let increamentVideo = C_Ufind.videosWatched + parseInt(videosWatched);
+
+
+  await prisma.userCourseProgress.update({
+    where: {
+      userId,
+      courseId
+    },
+
+    data: {
+      videosWatched: Number(increamentVideo)
+    }
+  })
+
+})
+
 module.exports = {
   updateUserController,
   addUserController,
   loginUserController,
   getUsers,
   deleteUser,
+  userCourseProgres
 };

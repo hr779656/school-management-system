@@ -4,6 +4,7 @@ const {
   loginUserController,
   getUsers,
   deleteUser,
+  userCourseProgres
 } = require('./user.controller');
 
 module.exports = {
@@ -12,4 +13,5 @@ module.exports = {
   loginUserController,
   getUsers,
   deleteUser,
+  userCourseProgres
 };

@@ -3,41 +3,36 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = "postgres://rdomfzja:W9O0nfQyaRjgbFpd5v-y5IL7BI7jdvhZ@bubble.db.elephantsql.com:5432/rdomfzja"
-  shadowDatabaseUrl = "postgresql://postgres:j4asbc56@localhost:5432/SMSDb?schema=public"
+  provider = "postgresql"
+  url      = "postgresql://postgres:j4asbc56@localhost:5432/SMSDb?schema=public"
 }
 
 model Users {
-  id        Int       @id @default(autoincrement())
-  name      String
-  password  String
-  email     String    @unique
-  age       Int
-  city      String
-  status    Boolean?  @default(false)
-  role      Role      @default(USER)
-  courses   Courses[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-}
-
-enum Role {
-  USER
-  ADMIN
+  id         Int                  @id @default(autoincrement())
+  name       String
+  password   String
+  email      String               @unique
+  age        Int
+  city       String
+  status     Boolean?             @default(false)
+  role       String
+  courses    Courses[]
+  Progresses UserCourseProgress[]
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @default(now())
 }
 
 model Courses {
-  id          Int    @id @default(autoincrement())
+  id          Int                  @id @default(autoincrement())
   title       String
   description String
-  price       Int    @default(10)
-  image       String @default("will added later")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  users     Users[]
-  videos    Videos[]
+  price       Int                  @default(10)
+  image       String               @default("will added later")
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @default(now())
+  users       Users[]
+  videos      Videos[]
+  progresses  UserCourseProgress[]
 }
 
 model Videos {
@@ -48,4 +43,24 @@ model Videos {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
   course      Courses[]
+}
+
+model Contact {
+  id      Int    @id @default(autoincrement())
+  name    String
+  email   String @unique
+  subject String
+  message String
+}
+
+model UserCourseProgress {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  courseId      Int
+  videosWatched Int      @default(0)
+  completed     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+  user          Users    @relation(fields: [userId], references: [id])
+  course        Courses  @relation(fields: [courseId], references: [id])
 }
