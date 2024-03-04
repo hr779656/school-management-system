@@ -3,6 +3,7 @@ const { prisma } = require('../../DB/dbConfig');
 const asyncHandler = require('../../utils/asyncHandler');
 const { ErrorHandler } = require('../../utils/errorhandler');
 const { sendCookieToken } = require('../authControllers');
+const { promises } = require('nodemailer/lib/xoauth2');
 
 const addUserController = asyncHandler(async (req, res, next) => {
   const {
@@ -81,7 +82,7 @@ const updateUserController = asyncHandler(async (req, res, next) => {
     where: { id: Number(userId) },
     data: {
       ...body,
-      courses: { connect: body.courses.map((courseId) => ({ id: courseId })) },
+      courses: { connect: body.courses.map((courseId) => ({ id: Number(courseId) })) },
 
     },
   });
@@ -113,6 +114,9 @@ const deleteUser = asyncHandler(async (req, res, next) => {
 });
 
 
+
+//  UserCourseProgress =======
+
 const userCourseProgres = asyncHandler(async (req, res, next) => {
   const { userId, courseId, videosWatched, completed } = req.body
 
@@ -120,46 +124,74 @@ const userCourseProgres = asyncHandler(async (req, res, next) => {
     return next(new ErrorHandler("All fileds Are Required", 400))
   }
 
-  const C_Ufind = await prisma.userCourseProgress.findFirst({
+  const findusercourse = await prisma.users.findFirst({
     where: {
-      userId: Number(userId),
-      courseId: Number(courseId)
-    }
-  })
-
-  if (!C_Ufind) {
-
-    await prisma.userCourseProgress.create({
-      data: {
-        userId: Number(userId),
-        courseId: Number(courseId),
-        videosWatched: Number(videosWatched),
-        completed
-      }
-    }).then((result) => {
-      console.log(result)
-      res.status(200).json({ msg: 'userProgress saved successfully' })
-    })
-      .catch((err) => {
-        console.log(err)
-        next(new ErrorHandler('something wrong userProgress Not saved', 400))
-      })
-  }
-
-
-  let increamentVideo = C_Ufind.videosWatched + parseInt(videosWatched);
-
-
-  await prisma.userCourseProgress.update({
-    where: {
-      userId,
-      courseId
+      id: Number(userId)
     },
-
-    data: {
-      videosWatched: Number(increamentVideo)
+    include: {
+      courses: {
+        select: {
+          id: true
+        }
+      }
     }
   })
+
+  if (findusercourse) {
+    const a = findusercourse.courses.filter((item) => item.id === parseInt(courseId))
+
+    if (a) {
+
+      const C_Ufind = await prisma.userCourseProgress.findFirst({
+        where: {
+          userId: Number(userId),
+          courseId: Number(courseId)
+        }
+      })
+
+      if (!C_Ufind) {
+
+        await prisma.userCourseProgress.create({
+          data: {
+            userId: Number(userId),
+            courseId: Number(courseId),
+            videosWatched: Number(videosWatched),
+            completed
+          }
+        }).then((result) => {
+          console.log(result)
+          return res.status(200).json({ msg: 'userProgress saved successfully' })
+        })
+          .catch((err) => {
+            console.log(err)
+            return next(new ErrorHandler('something wrong userProgress Not saved', 400))
+          })
+      }
+
+      if (C_Ufind.completed === true) {
+        let increamentVideo = C_Ufind.videosWatched + parseInt(videosWatched);
+        return increamentVideo;
+      }
+
+      await prisma.userCourseProgress.update({
+        where: {
+          userId,
+          courseId
+        },
+        data: {
+          videosWatched: Number(increamentVideo),
+          completed
+        }
+      })
+
+      return res.status(200).json({ msg: 'user Progress update' })
+
+    } else {
+      next(new ErrorHandler('Not Enrolled'))
+    }
+  } else {
+    next(new ErrorHandler('User Not Found'))
+  }
 
 })
 

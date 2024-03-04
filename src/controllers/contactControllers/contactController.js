@@ -12,18 +12,18 @@ const userCotacts = asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler('Please fill all required fields', 400));
     }
 
-    await prisma.contact.create({
+    const response = await prisma.contact.create({
         data: {
             name,
             email,
             subject,
             message
         }
-    }).then((result) => {
-        res.json({ msg: "contact Saved Successfully" })
-    }).catch(() => {
-        next(new ErrorHandler("Contact Not saved", 400))
     })
+    if (!response) {
+        return next(new ErrorHandler('Unable to add message!', 400));
+    }
+    return res.status(200).json({ message: "Message send successfully" })
 
 });
 
@@ -73,7 +73,12 @@ const AdminSendMail = asyncHandler(async (req, res, next) => {
 
 const allContacts = asyncHandler(async (req, res, next) => {
     const contacts = await prisma.contact.findMany()
-    res.json({ data: contacts })
+
+    if (!contacts) {
+        return next(new ErrorHandler('not found', 404))
+    }
+
+    return res.json({ data: contacts })
 })
 
 module.exports = { userCotacts, AdminSendMail, allContacts };

@@ -22,13 +22,7 @@ const getCourses = asyncHandler(async (req, res, next) => {
   if (!courses || courses.length === 0) {
     return next(new ErrorHandler('No courses found ', 404));
   }
-  // const coursesWithCount = courses.map((course) => (
-  //   {
-  //     ...course,
-  //     totalEnrolled: course.enrolledStudents.length,
-  //     totalVideos: course.videos.length,
-  //   }
-  // ));
+
 
   return res.status(200).json({ data: courses });
 });
