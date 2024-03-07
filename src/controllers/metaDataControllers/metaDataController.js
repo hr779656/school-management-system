@@ -1,51 +1,34 @@
 const fs = require('fs');
-const path = require('path')
+const path = require('path');
 const asyncHandler = require('../../utils/asyncHandler');
-const { ErrorHandler } = require('../../utils/errorhandler')
+const { ErrorHandler } = require('../../utils/errorhandler');
 
+const filePath = path.join(__dirname, 'check.json');
 
-
+// Create Credentials Files ==========
 const credentials = asyncHandler(async (req, res, next) => {
+  const credentialsData = req.body;
 
-    const { credentialsData } = req.body
+  if (typeof credentialsData === 'object' && credentialsData !== null && Object.keys(credentialsData).length !== 0) {
+    if (fs.existsSync(filePath)) {
+      return next(new ErrorHandler('Please Delete Exist File'), 400);
+    }
 
-    // agar file  exist krti hai to yeh error bhej do
-    const file = fs.writeFileSync(filePath, JSON.stringify(organizedData));
-    // if () {
+    fs.writeFileSync(filePath, JSON.stringify(credentialsData));
+    return res.status(200).json({ msg: 'File successfully created!' });
+  }
 
-    //     next(new ErrorHandler('Creadentials file already exists. Please delete it to create new one! ', 400))
-    // }
-    const organizedData = {
-        "type": type,
-        "project_id": project_id,
-        "private_key_id": private_key_id,
-        "private_key": private_key,
-        "client_email": client_email,
-        "client_id": client_id,
-        "auth_uri": auth_uri,
-        "token_uri": token_uri,
-        "auth_provider_x509_cert_url": auth_provider_x509_cert_url,
-        "client_x509_cert_url": client_x509_cert_url,
-        "universe_domain": universe_domain
-    };
+  return next(new ErrorHandler('Invalid Data: credentialsData should be a non-null object', 400));
+});
 
-    const path = require('path');
-    const filePath = path.join(__dirname, 'check.json');
-    fs.writeFileSync(filePath, JSON.stringify(organizedData));
+// Delete Credentials Files ==========
+const deleteCredentials = asyncHandler(async (req, res, next) => {
+  try {
+    fs.unlinkSync(filePath);
+    return res.status(200).json({ msg: 'File deleted successfully.' });
+  } catch (err) {
+    return next(new ErrorHandler('File not Exist', 400));
+  }
+});
 
-
-
-    res.status(200).json({ msg: 'file sucessfully created' })
-
-})
-
-module.exports = { credentials }
-
-
-// // FE
-
-// aik page, page ke andr
-// Google Credentials,
-//     input
-
-// // yeh sab paste krna hgai user ner,
+module.exports = { credentials, deleteCredentials };

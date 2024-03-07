@@ -1,9 +1,9 @@
 const express = require('express');
-const MD_Route = require('./MDroutes');
+const mdRoute = require('./MDroutes');
 
-const MD_Routes = express.Router();
+const mdRoutes = express.Router();
 
-MD_Routes.use(MD_Route);
-MD_Routes.use('*', (req, res) => { res.status(404).send('Route Not Found'); });
+mdRoutes.use(mdRoute);
+mdRoutes.use('*', (req, res) => { res.status(404).send('Route Not Found'); });
 
-module.exports = MD_Routes;
+module.exports = mdRoutes;

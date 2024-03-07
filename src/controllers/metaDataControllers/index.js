@@ -1,5 +1,6 @@
-const { credentials } = require('./metaDataController');
+const { credentials, deleteCredentials } = require('./metaDataController');
 
 module.exports = {
-    credentials
-}
+  credentials,
+  deleteCredentials,
+};
